@@ -50,15 +50,11 @@ router.get('/', async (req, res) => {
 router.get('/:code', async (req, res) => {
     try {
         const { code } = req.params
-        const character = await Character.findAll({
-            where: {
-                code
-            }
-        })
-        if (!character.length) {
+        const character = await Character.findByPk(code)
+        if (!character) {
             return res.status(404).send(`El código ${code} no corresponde a un personaje existente`)
         }
-        return res.json(character[0])
+        return res.json(character)
     } catch (error) {
         return res.send(error.message)
     }
