@@ -26,10 +26,17 @@ router.post('/', async (req, res) => {
 router.get('/', async (req, res) => {
     try {
         const { race, code, name, age, hp, mana, date_added } = req.query
-        const condition = race
-            ? { where: { race } }
-            : {}
-        const attrQuery = { code, name, age, hp, mana, date_added }
+        const condition =
+            race && age
+                ? {
+                    where: {
+                        [Op.and]: [{ race }, { age }]
+                    }
+                }
+                : race
+                    ? { where: { race } }
+                    : {}
+        const attrQuery = { race, code, name, age, hp, mana, date_added }
 
         for (const key in attrQuery) {
             if (attrQuery[key] === 'true') {
@@ -47,6 +54,29 @@ router.get('/', async (req, res) => {
 
 })
 
+router.get('/young', async (req, res) => {
+    try {
+        const youngs = await Character.findAll({
+            where: {
+                age: { [Op.lt]: 25 }
+            }
+        })
+        res.json(youngs)
+    } catch (error) {
+        return res.send(error.message)
+    }
+})
+
+router.get('/roles/:code', async (req, res) => {
+    try {
+        const { code } = req.params
+        const character = await Character.findByPk(code, { include: Role })
+        res.json(character)
+    } catch (error) {
+        res.status(404).json({ error: error.message })
+    }
+})
+
 router.get('/:code', async (req, res) => {
     try {
         const { code } = req.params
@@ -57,6 +87,36 @@ router.get('/:code', async (req, res) => {
         return res.json(character)
     } catch (error) {
         return res.send(error.message)
+    }
+})
+
+router.put('/addAbilities', async (req, res) => {
+    try {
+        const { codeCharacter, abilities } = req.body
+        const character = await Character.findByPk(codeCharacter)
+        const promises = abilities.map(ability => character.createAbility(ability))
+        await Promise.all(promises)
+        res.json({ success: 'Abilities were successfully added' })
+    } catch (error) {
+        res.status(404).json({ error: error.message })
+    }
+})
+
+router.put('/:attribute', async (req, res) => {
+    try {
+        const { params: { attribute }, query: { value } } = req
+        const countUpdated = await Character.update({
+            [attribute]: value
+        }, {
+            where: {
+                [attribute]: {
+                    [Op.is]: null
+                }
+            }
+        })
+        res.send('Personajes actualizados')
+    } catch (error) {
+        res.send(error.message)
     }
 })
 

@@ -1,6 +1,6 @@
-const { DataTypes } = require('sequelize');
+//const { DataTypes } = require('sequelize');
 
-module.exports = sequelize => {
+module.exports = (sequelize, DataTypes) => {
   sequelize.define('Player', {
     firstName: {
       type: DataTypes.STRING
@@ -21,7 +21,8 @@ module.exports = sequelize => {
       defaultValue: DataTypes.NOW
     },
     status: {
-      type: DataTypes.ENUM('active', 'injured', 'retired')
+      type: DataTypes.ENUM('active', 'injured', 'retired'),
+        defaultValue: 'active'
     },
     skill: {
       type: DataTypes.INTEGER,

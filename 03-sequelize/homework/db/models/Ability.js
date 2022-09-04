@@ -1,6 +1,6 @@
-const { DataTypes } = require('sequelize');
+//const { DataTypes } = require('sequelize');
 
-module.exports = sequelize => {
+module.exports = (sequelize, DataTypes) => {
     sequelize.define('Ability', {
         name: {
             type: DataTypes.STRING,
@@ -13,7 +13,17 @@ module.exports = sequelize => {
         mana_cost: {
             type: DataTypes.FLOAT,
             allowNull: false,
-            unique: 'unique'
+            unique: 'unique',
+            validate: {
+                min: 10,
+                max: 250
+            }
+        },
+        summary: {
+            type: DataTypes.VIRTUAL,
+            get() {
+                return `${this.name} (${Math.floor(this.mana_cost)} points of mana) - Description: ${this.description}`
+            }
         }
     })
 }

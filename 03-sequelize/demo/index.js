@@ -32,10 +32,10 @@ server.post('/players/bulk', async (req, res) => {
 
 server.get('/players', async (req, res) => {
   const { name } = req.query;
-  const condition = name 
-    ? {where: {firstName: name}}
+  const condition = name
+    ? { where: { firstName: name } }
     : {}
-  condition.attributes = { exclude: ['actualizado']}
+  condition.attributes = { exclude: ['actualizado'] }
   const players = await Player.findAll(
     condition,
   );
@@ -83,7 +83,7 @@ server.get('/players/id/:id', async (req, res) => {
 server.get('/players/findorcreate', async (req, res) => {
   const { firstName, lastName, username, birthday, status, skill } = req.body;
   const [player, created] = await Player.findOrCreate({
-    where: {username},
+    where: { username },
     defaults: {
       firstName,
       lastName,
@@ -92,13 +92,13 @@ server.get('/players/findorcreate', async (req, res) => {
       skill
     }
   });
-  res.json({created: created, player});
+  res.json({ created: created, player });
 });
 
 server.get('/players/ordered', async (req, res) => {
   const { attribute, order } = req.query;
   const players = await Player.findAll({
-    where: {skill: {[Op.not]: null}},
+    where: { skill: { [Op.not]: null } },
     order: [
       [attribute, order]
     ]
@@ -132,7 +132,7 @@ server.get('/players/utility/count', async (req, res) => {
 
 server.get('/players/utility/maxormin', async (req, res) => {
   const { attribute, max } = req.query;
-  if(max === 'true') {
+  if (max === 'true') {
     return res.json(await Player.max(attribute));
   }
   res.json(await Player.min(attribute));
@@ -146,7 +146,7 @@ server.get('/players/utility/sum', async (req, res) => {
 server.get('/players/:username', async (req, res) => {
   const { username } = req.params;
   const player = await Player.findOne({
-    where: {username}
+    where: { username }
   });
   res.json(player || 'Player not found');
 });
@@ -156,10 +156,10 @@ server.put('/players', async (req, res) => {
   const { username, status } = req.body;
   try {
     const player = await Player.findOne({
-      where: {username}
+      where: { username }
     });
     player.status = status;
-    if(persist) await player.save();
+    if (persist) await player.save();
     // console.log(player);
     // console.log(player.toJSON());
     res.json(player);
@@ -172,7 +172,7 @@ server.put('/players/all', async (req, res) => {
   const response = await Player.update(
     { skill: 50 },
     {
-      where: {skill: {[Op.is]: null}}
+      where: { skill: { [Op.is]: null } }
     }
   );
   res.send(`${response} players updated`);
@@ -180,9 +180,9 @@ server.put('/players/all', async (req, res) => {
 
 server.get('/teams', async (req, res) => {
   const { name } = req.query;
-  const condition = name 
-  ? {where: {name}}
-  : {}
+  const condition = name
+    ? { where: { name } }
+    : {}
   const teams = await Team.findAll(condition);
   res.json(teams);
 });
@@ -207,17 +207,17 @@ server.post('/teams/bulk', async (req, res) => {
 
 server.delete('/clear/:model', async (req, res) => {
   const { model } = req.params;
-  if(model === 'player') 
+  if (model === 'player')
     return res.json(await Player.destroy({
       truncate: true
     }))
-  
-  if(model === 'team') 
+
+  if (model === 'team')
     return res.json(await Team.destroy({
       truncate: true
     }))
 
-  if(model === 'relation') 
+  if (model === 'relation')
     return res.json(await PlayerTeam.destroy({
       truncate: true
     }))
@@ -235,7 +235,7 @@ server.put('/multipletransfer', async (req, res) => {
   const { override } = req.query;
   const { idPlayer, codeTeams } = req.body;
   const player = await Player.findByPk(idPlayer);
-  if(override) return res.json(await player.setTeams(codeTeams))
+  if (override) return res.json(await player.setTeams(codeTeams))
   res.json(await player.addTeams(codeTeams));
 });
 
@@ -290,5 +290,5 @@ server.use('/', (req, res) => {
 
 server.listen(3000, () => {
   console.log('Server running on port 3000');
-  db.sync();
+  db.sync({ force: true });
 });
